@@ -1,0 +1,66 @@
+services:
+    sgu-database:
+        image: mysql:8
+        container_name: sgu-database
+        environment:
+            MYSQL_ROOT_PASSWORD: admin
+            MYSQL_DATABASE: sgu_db
+        ports:
+            - "3307:3306"
+        networks: 
+            - sgu-net
+        volumes: 
+            - sgu-volume:/var/lib/mysql
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-padmin"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+    
+    sgu-backend:
+        image: server:1.0-sgu
+        build:
+            context: ./server
+        environment:
+            SERVER_PORT: 8080
+            DB_HOST: sgu-database
+            DB_PORT: 3306
+            DB_NAME: sgu_db
+            DB_USER: root
+            DB_PASSWORD: admin
+        container_name: sgu-backend
+        ports:
+            - "8081:8080"
+        networks:
+            - sgu-net
+        depends_on:
+            sgu-database:
+                condition: service_healthy
+
+    sgu-frontend:
+        image: client:1.0-sgu
+        build:
+            context: ./client
+            args:
+                API_HOST: localhost
+                API_BASE: /api
+                API_PORT: 8081
+        container_name: sgu-frontend
+        ports:
+            - "3000:80"
+        networks:
+            - sgu-net
+        depends_on:
+            - sgu-backend
+
+# 1. docker volume create sgu-volume
+volumes:
+    sgu-volume:
+        external: true
+
+# 2. docker network create --driver bridge sgu-net
+networks:
+    sgu-net:
+        external: true
+
+# 3. docker compose build --no-cache
