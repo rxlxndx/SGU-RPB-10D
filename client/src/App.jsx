@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 
-// ✅ CAMBIO: usar import.meta.env en lugar de process.env
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8081/api';
+//  Construir URL desde variables de entorno
+const API_PROTOCOL = import.meta.env.VITE_API_PROTOCOL || 'https';
+const API_HOST = import.meta.env.VITE_API_HOST || 'localhost';
+const API_PORT = import.meta.env.VITE_API_PORT || '8081';
+const API_BASE = import.meta.env.VITE_API_BASE || '/api';
 
+const API_URL = `${API_PROTOCOL}://${API_HOST}:${API_PORT}${API_BASE}`;
+
+console.log('API_URL configurada:', API_URL);
 function App() {
   const [users, setUsers] = useState([]);
   const [showForm, setShowForm] = useState(false);

@@ -13,11 +13,13 @@ COPY . .
 ARG API_HOST
 ARG API_PORT
 ARG API_BASE
+ARG API_PROTOCOL
 
 # CONFIGURAR VARIABLES DE ENTORNO EN BASE A LO DE ARRIBA (van al .env)
 ENV VITE_API_HOST=$API_HOST
 ENV VITE_API_PORT=$API_PORT
 ENV VITE_API_BASE=$API_BASE
+ENV VITE_API_PROTOCOL=$API_PROTOCOL 
 
 # Genera carpeta dist (frontend compilado)
 RUN npm run build
@@ -26,6 +28,9 @@ RUN npm run build
 FROM nginx:alpine
 
 COPY --from=build /app/dist /usr/share/nginx/html
+
+#Copiar el archivo nginx.conf a la imagen para habilitar HTTPS
+COPY ./nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 80
 
